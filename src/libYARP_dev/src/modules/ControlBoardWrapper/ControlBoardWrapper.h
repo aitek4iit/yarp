@@ -327,6 +327,7 @@ private:
     int               top;          // to be removed
     int               period;       // thread rate for publishing data
     bool              _verb;        // make it work and propagate to subdevice if --subdevice option is used
+    std::vector<JointTypeEnum>     jointTypes;
 
     yarp::os::Bottle getOptions();
     bool updateAxisName();
@@ -346,6 +347,8 @@ private:
 
     bool ownDevices;
 #endif  //DOXYGEN_SHOULD_SKIP_THIS
+
+    bool threadInit();
 
 public:
     /**

@@ -833,6 +833,20 @@ bool ControlBoardWrapper::detachAll()
         return true;
 }
 
+bool ControlBoardWrapper::threadInit()
+{
+    bool ret = true;
+    jointTypes.resize(controlledJoints);
+    for(int i=0; i< controlledJoints; i++)
+    {
+        ret &=getJointType(i, jointTypes[i]);
+    }
+    if(!ret)
+        yError() << "ControlBoardWrapper for part " << partName << " was not able to determine the joint type (revolute or linear). \n Check you configuration file.";
+    return ret;
+}
+
+
 void ControlBoardWrapper::run()
 {
     // check we are not overflowing with input messages
@@ -914,8 +928,15 @@ void ControlBoardWrapper::run()
         getEncoderSpeeds(ros_struct.velocity.data());
         getTorques(ros_struct.effort.data());
 
-        convertDegreesToRadians(ros_struct.position);
-        convertDegreesToRadians(ros_struct.velocity);
+        JointTypeEnum jType;
+        for(int i=0; i< controlledJoints; i++)
+        {
+            if(jointTypes[i] == VOCAB_JOINTTYPE_REVOLUTE)
+            {
+                convertDegreesToRadians(ros_struct.position[i]);
+                convertDegreesToRadians(ros_struct.velocity[i]);
+            }
+        }
         ros_struct.name=jointNames;
 
         ros_struct.header.seq = rosMsgCounter++;
